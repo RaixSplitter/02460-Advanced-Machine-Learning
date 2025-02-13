@@ -33,7 +33,7 @@ class GaussianPrior(nn.Module):
         Returns:
         prior: [torch.distributions.Distribution]
         """
-        return td.Independent(td.Normal(loc=self.mean, scale=self.std), 1)
+        return td.Independent(td.Normal(loc=self.mean, scale=self.std), 1) #https://pytorch.org/docs/stable/distributions.html#independent
 
 
 class GaussianEncoder(nn.Module):
@@ -58,7 +58,7 @@ class GaussianEncoder(nn.Module):
         x: [torch.Tensor] 
            A tensor of dimension `(batch_size, feature_dim1, feature_dim2)`
         """
-        mean, std = torch.chunk(self.encoder_net(x), 2, dim=-1)
+        mean, std = torch.chunk(self.encoder_net(x), 2, dim=-1) # Split the tensor into two parts along the last dimension in order to get mean and std
         return td.Independent(td.Normal(loc=mean, scale=torch.exp(std)), 1)
 
 
@@ -120,7 +120,7 @@ class VAE(nn.Module):
            Number of samples to use for the Monte Carlo estimate of the ELBO.
         """
         q = self.encoder(x)
-        z = q.rsample()
+        z = q.rsample() #https://pytorch.org/docs/stable/distributions.html See pathwise derivative for reparameterization trick
         elbo = torch.mean(self.decoder(z).log_prob(x) - td.kl_divergence(q, self.prior()), dim=0)
         return elbo
 
